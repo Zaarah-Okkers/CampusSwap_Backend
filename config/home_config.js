@@ -1,4 +1,9 @@
-import dotenv from 'dotenv':
+// this will contain all my pages information 
+// home page
+// login page
+// dashboard page - res manager, admin , student, provider 
+
+import dotenv from 'dotenv';
 import mysql from 'mysql2/promise';
 
 dotenv.config();
