@@ -52,7 +52,7 @@ app.use('/api/service-types', serviceTypeRoutes);
 app.use('/api/providers', providerRoutes);
 app.use('/api/services', serviceRoutes);
 
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
     console.log(`SafeHome ZA API is running on port ${PORT}`);
