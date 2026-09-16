@@ -4,12 +4,20 @@ const { mapProduct, mapReview } = require('../utils/mapProduct')
 const PRODUCT_SELECT = `
   SELECT
     p.*,
-    s.name AS seller_name,
+    s.full_name AS seller_name,
     s.rating AS seller_rating,
-    u.name AS university_name
+    uni.name AS university_name
   FROM products p
-  JOIN sellers s ON p.seller_id = s.id
-  LEFT JOIN universities u ON p.university_id = u.id
+  JOIN users s ON p.seller_id = s.id
+  LEFT JOIN universities uni ON p.university_id = uni.id
+`
+
+const REVIEW_SELECT = `
+  SELECT rv.*, u.full_name AS reviewer_name
+  FROM reviews rv
+  JOIN users u ON rv.reviewer_id = u.id
+  WHERE rv.product_id = ?
+  ORDER BY rv.created_at DESC
 `
 
 async function getProducts(req, res) {
@@ -19,7 +27,7 @@ async function getProducts(req, res) {
 
     const [rows] = await pool.query(
       `${PRODUCT_SELECT}
-       WHERE (? = '' OR u.name = ?)
+       WHERE (? = '' OR uni.name = ?)
          AND (? = '' OR p.condition_label = ?)
          AND (p.price IS NULL OR p.price <= ?)
          AND (? = '' OR p.name LIKE CONCAT('%', ?, '%'))
@@ -43,10 +51,7 @@ async function getProductById(req, res) {
       return res.status(404).json({ error: 'Product not found' })
     }
 
-    const [reviewRows] = await pool.query(
-      'SELECT * FROM reviews WHERE product_id = ? ORDER BY created_at DESC',
-      [id]
-    )
+    const [reviewRows] = await pool.query(REVIEW_SELECT, [id])
 
     const product = mapProduct(rows[0])
     product.reviews = reviewRows.map(mapReview)
@@ -57,10 +62,14 @@ async function getProductById(req, res) {
     res.status(500).json({ error: 'Failed to fetch product' })
   }
 }
+
 async function createProduct(req, res) {
   const conn = await pool.getConnection()
   try {
     const {
+      sellerId,
+      categoryId,
+      universityId = null,
       listingType = 'sell',
       name,
       price = null,
@@ -69,30 +78,26 @@ async function createProduct(req, res) {
       condition,
       conditionClass = '',
       image = 'https://placehold.co/300x200',
-      sellerName,
       description = ''
     } = req.body
 
-    if (!name || !condition || !sellerName) {
-      return res.status(400).json({ error: 'name, condition, and sellerName are required' })
+    if (!name || !condition || !sellerId || !categoryId) {
+      return res.status(400).json({ error: 'name, condition, sellerId, and categoryId are required' })
     }
 
     await conn.beginTransaction()
 
-    let [sellerRows] = await conn.query('SELECT id FROM sellers WHERE name = ?', [sellerName])
-    let sellerId
-    if (sellerRows.length > 0) {
-      sellerId = sellerRows[0].id
-    } else {
-      const [result] = await conn.query('INSERT INTO sellers (name) VALUES (?)', [sellerName])
-      sellerId = result.insertId
+    const [sellerRows] = await conn.query('SELECT id FROM users WHERE id = ?', [sellerId])
+    if (sellerRows.length === 0) {
+      await conn.rollback()
+      return res.status(400).json({ error: 'sellerId does not match an existing user' })
     }
 
     const [insertResult] = await conn.query(
       `INSERT INTO products
-        (listing_type, name, description, price, rent_period, swap_for, condition_label, condition_class, image_url, seller_id)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [listingType, name, description, price, rentPeriod, swapFor, condition, conditionClass, image, sellerId]
+        (seller_id, category_id, university_id, listing_type, name, description, price, rent_period, swap_for, condition_label, condition_class, image_url)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [sellerId, categoryId, universityId, listingType, name, description, price, rentPeriod, swapFor, condition, conditionClass, image]
     )
 
     await conn.commit()
@@ -107,14 +112,15 @@ async function createProduct(req, res) {
     conn.release()
   }
 }
+
 async function submitReview(req, res) {
   const conn = await pool.getConnection()
   try {
     const { id } = req.params
-    const { reviewerName, productRating = 0, sellerRating = 0, comment = '' } = req.body
+    const { reviewerId, productRating = 0, sellerRating = 0, comment = '' } = req.body
 
-    if (!reviewerName) {
-      return res.status(400).json({ error: 'reviewerName is required' })
+    if (!reviewerId) {
+      return res.status(400).json({ error: 'reviewerId is required' })
     }
 
     await conn.beginTransaction()
@@ -130,9 +136,9 @@ async function submitReview(req, res) {
     const product = productRows[0]
 
     await conn.query(
-      `INSERT INTO reviews (product_id, reviewer_name, product_rating, seller_rating, comment)
+      `INSERT INTO reviews (product_id, reviewer_id, product_rating, seller_rating, comment)
        VALUES (?, ?, ?, ?, ?)`,
-      [id, reviewerName, productRating || null, sellerRating || null, comment]
+      [id, reviewerId, productRating || null, sellerRating || null, comment]
     )
 
     if (productRating > 0) {
@@ -147,13 +153,13 @@ async function submitReview(req, res) {
 
     if (sellerRating > 0) {
       const [sellerRows] = await conn.query(
-        'SELECT rating, rating_count FROM sellers WHERE id = ? FOR UPDATE',
+        'SELECT rating, rating_count FROM users WHERE id = ? FOR UPDATE',
         [product.seller_id]
       )
       const seller = sellerRows[0]
       const newCount = seller.rating_count + 1
       const newRating = ((seller.rating * seller.rating_count) + sellerRating) / newCount
-      await conn.query('UPDATE sellers SET rating = ?, rating_count = ? WHERE id = ?', [
+      await conn.query('UPDATE users SET rating = ?, rating_count = ? WHERE id = ?', [
         newRating.toFixed(1),
         newCount,
         product.seller_id
@@ -163,10 +169,7 @@ async function submitReview(req, res) {
     await conn.commit()
 
     const [rows] = await pool.query(`${PRODUCT_SELECT} WHERE p.id = ?`, [id])
-    const [reviewRows] = await pool.query(
-      'SELECT * FROM reviews WHERE product_id = ? ORDER BY created_at DESC',
-      [id]
-    )
+    const [reviewRows] = await pool.query(REVIEW_SELECT, [id])
     const updated = mapProduct(rows[0])
     updated.reviews = reviewRows.map(mapReview)
 
@@ -179,4 +182,5 @@ async function submitReview(req, res) {
     conn.release()
   }
 }
+
 module.exports = { getProducts, getProductById, createProduct, submitReview }
