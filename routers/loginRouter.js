@@ -1,13 +1,21 @@
-// here will be the imports 
+// here will be the imports
 import express from "express";
-import { register, handlelogin} from "../controller/login_con.js"
+import {
+  register,
+  handlelogin,
+  changePassword,
+} from "../controller/login_con.js";
 
-
-// here will be the routers 
+// here will be the routers
 const router = express.Router();
 
-router.post("/login",handlelogin);
-router.post("/register",register);
+// user login
+router.post("/login", handlelogin);
 
+// new user sgin up
+router.post("/register", register);
 
-export default router 
+// changes the user password
+router.post("/change-password", changePassword);
+
+export default router;

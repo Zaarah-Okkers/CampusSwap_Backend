@@ -10,19 +10,19 @@ const router = express.Router();
 // router.post("/student", fetchStudentDashb);
 
 router.get("/student/:userId",  fetchStudentDashb);
-router.get("/student", fetchStudentDashb);
+
 
 // the res manager
 // router.post("/res manager", fetchResMgnerDash);
-router.get("/res manager",  fetchResMgnerDash);
+router.get("/res-manager", fetchResMgnerDash);
 
 // the admin
 // router.post("/admin",  fetchAdminDash);
-router.get("/admin",  fetchAdminDash);
+router.get("/admin",fetchAdminDash);
 
 // the provider 
 // router.post("/provider", fetchProviderDash);
 router.get("/provider/:providerId", fetchProviderDash);
-router.get("/provider", fetchProviderDash);
+
 
 export default router;
