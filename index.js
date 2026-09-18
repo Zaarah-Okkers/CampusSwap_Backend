@@ -4,9 +4,9 @@ import cors from "cors";
 
 // the pages imports
 import { db } from "./config/dhl_config.js";
-import loginRouter from "./routers/loginRouter.js";
-import dashboardsRouter from "./routers/dashboardsRouter.js";
-import homeRouter from "./routers/homeRouter.js";
+import loginRouter from "./routers/loginRouters.js";
+import dashboardsRouter from "./routers/dashboardsRouters.js";
+import homeRouter from "./routers/homeRouters.js";
 
 dotenv.config();
 const app = express();
