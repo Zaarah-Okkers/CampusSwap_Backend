@@ -61,3 +61,5 @@ export const getProviderData = async (providerId) => {
 
   return { assignedJobs };
 };
+
+
