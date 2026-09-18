@@ -397,3 +397,105 @@ INSERT INTO reviews (product_id, reviewer_id, product_rating, seller_rating, com
 -- REPORTS
 INSERT INTO reports (reporter_id, reported_user_id, product_id, reason, details, status) VALUES
   (21, 14, 2, 'Off-Platform Request', 'Seller asked to handle payment outside CampusSwap.', 'pending');
+  
+  --  features near you images
+-- 1. HP EliteBook 840 G5 — SELL
+UPDATE products SET
+  name = 'HP EliteBook 840 G5 (Used)',
+  description = 'Intel Core i5, 8GB RAM, 256GB SSD. Great for engineering and commerce students. Comes with charger.',
+  price = 650.00,
+  listing_type = 'sell',
+  rent_period = NULL,
+  swap_for = NULL,
+  condition_label = 'Used: Good',
+  image_url = 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400&h=300&fit=crop'
+WHERE id = 1;
+
+-- 2. University Physics (Young & Freedman) — RENT
+UPDATE products SET
+  name = 'University Physics (Young & Freedman)',
+  description = 'Prescribed physics textbook available for weekly rental. Perfect for one-semester physics students.',
+  price = 80.00,
+  listing_type = 'rent',
+  rent_period = 'week',
+  swap_for = NULL,
+  condition_label = 'Used: Like New',
+  image_url = 'https://images.unsplash.com/photo-1532012197267-da84d127e765?w=400&h=300&fit=crop'
+WHERE id = 2;
+
+-- 3. Anti-Theft Laptop Backpack — SELL
+UPDATE products SET
+  name = 'Anti-Theft Laptop Backpack',
+  description = 'Fits 15.6" laptops. Hidden zip compartment and USB charging port. Ideal for campus commute.',
+  price = 180.00,
+  listing_type = 'sell',
+  rent_period = NULL,
+  swap_for = NULL,
+  condition_label = 'Used: Fair',
+  image_url = 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&h=300&fit=crop'
+WHERE id = 3;
+
+-- 4. Sony WH-CH510 Headphones — SELL
+UPDATE products SET
+  name = 'Sony WH-CH510 Wireless Headphones',
+  description = 'Bluetooth over-ear headphones with 35-hour battery. Perfect for study sessions in the library.',
+  price = 450.00,
+  listing_type = 'sell',
+  rent_period = NULL,
+  swap_for = NULL,
+  condition_label = 'Used: Like New',
+  image_url = 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=300&fit=crop'
+WHERE id = 4;
+
+-- 5. Casio FX-991ES Plus Calculator — SELL
+UPDATE products SET
+  name = 'Casio FX-991ES Plus Calculator',
+  description = 'Exam-approved scientific calculator. Required for engineering, science and accounting courses.',
+  price = 250.00,
+  listing_type = 'sell',
+  rent_period = NULL,
+  swap_for = NULL,
+  condition_label = 'Used: Like New',
+  image_url = 'https://images.unsplash.com/photo-1587145820266-a5951ee6f620?w=400&h=300&fit=crop'
+WHERE id = 5;
+
+-- 6. LED Desk Lamp — SELL
+UPDATE products SET
+  name = 'LED Desk Lamp with USB Port',
+  description = 'Three brightness settings with built-in USB charging. Perfect for late-night study.',
+  price = 120.00,
+  listing_type = 'sell',
+  rent_period = NULL,
+  swap_for = NULL,
+  condition_label = 'Used: Fair',
+  image_url = 'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=400&h=300&fit=crop'
+WHERE id = 6;
+
+-- 7. Organic Chemistry Textbook — SELL
+UPDATE products SET
+  name = 'Organic Chemistry (Clayden, 2nd Edition)',
+  description = 'Prescribed textbook for 2nd and 3rd year chemistry students. Cover shows slight wear.',
+  price = 380.00,
+  listing_type = 'sell',
+  rent_period = NULL,
+  swap_for = NULL,
+  condition_label = 'Used: Good',
+  image_url = 'https://images.unsplash.com/photo-1532153975070-2e9ab71f1b14?w=400&h=300&fit=crop'
+WHERE id = 7;
+
+-- 8. Mini Bar Fridge — SELL
+UPDATE products SET
+  name = 'Mini Bar Fridge (46L)',
+  description = 'Compact bar fridge fits perfectly in a res room. Energy-efficient and quiet.',
+  price = 680.00,
+  listing_type = 'sell',
+  rent_period = NULL,
+  swap_for = NULL,
+  condition_label = 'Used: Fair',
+  image_url = 'https://images.unsplash.com/photo-1571175443880-49e1d25b2bc5?w=400&h=300&fit=crop'
+WHERE id = 8;
+
+-- Verify all 8 products
+SELECT id, name, listing_type, price, rent_period, condition_label
+FROM products
+ORDER BY id;
