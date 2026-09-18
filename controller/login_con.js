@@ -69,7 +69,7 @@ export const changePassword = async (req, res) => {
 
     // Verify current password (plain text for now — will hash later)
     if (user.password_hash !== currentPassword) {
-      return res.status(401).json({ error: "Incorrect crediantials" });
+      return res.status(401).json({ error: "Incorrect credentials" });
     }
 
     // Update

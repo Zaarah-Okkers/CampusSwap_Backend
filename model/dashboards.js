@@ -1,7 +1,7 @@
 // here will be the imports
 import { db } from "../config/dhl_config.js";
 
-// here will b the functions to fetch the infor form the database
+// here will b the functions to fetch the information from the database
 
 // the student database
 
