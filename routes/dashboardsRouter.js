@@ -1,6 +1,6 @@
 // here will be the imports 
 import express from "express";
-import { fetchStudentDashb, fetchAdminDash, fetchProviderDash, fetchResMgnerDash } from "../controller/dashboard_con.js";
+import { fetchStudentDashb, fetchAdminDash, fetchProviderDash, fetchResMgnerDash } from "../controllers/dashboard_con.js";
 
 const router = express.Router();
 
