@@ -48,8 +48,10 @@ router.get('/repairs', async (req, res) => {
 });
 
 router.post('/orders/checkout', async (req, res) => {
-  const { buyerId, sellerId = null, items = [] } = req.body;
-  if (!buyerId || !Array.isArray(items) || items.length === 0) {
+  const { buyerId, buyer_id, sellerId = null, seller_id = null, items = [] } = req.body;
+  const buyer = buyerId ?? buyer_id;
+  const seller = sellerId ?? seller_id;
+  if (!buyer || !Array.isArray(items) || items.length === 0) {
     return res.status(400).json({ error: 'buyerId and at least one item are required' });
   }
 
@@ -60,14 +62,20 @@ router.post('/orders/checkout', async (req, res) => {
     const reference = `CS-${Date.now()}`;
     const [order] = await connection.query(
       'INSERT INTO orders (order_reference, buyer_id, seller_id, total_amount) VALUES (?, ?, ?, ?)',
-      [reference, buyerId, sellerId, total],
+      [reference, buyer, seller, total],
     );
     for (const item of items) {
       const quantity = Number(item.quantity ?? 1);
       const unitPrice = Number(item.unitPrice ?? item.price ?? 0);
       await connection.query(
         'INSERT INTO order_items (order_id, product_id, seller_id, quantity, unit_price) VALUES (?, ?, ?, ?, ?)',
-        [order.insertId, item.productId ?? item.id, item.sellerId ?? sellerId, quantity, unitPrice],
+        [
+          order.insertId,
+          item.productId ?? item.product_id ?? item.id,
+          item.sellerId ?? item.seller_id ?? seller,
+          quantity,
+          unitPrice,
+        ],
       );
     }
     await connection.query('INSERT INTO payments (order_id, amount) VALUES (?, ?)', [order.insertId, total]);
