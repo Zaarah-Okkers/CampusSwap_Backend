@@ -11,7 +11,7 @@ export const getStudentDashData = async (userId) => {
     [userId],
   );
 
-  const [myOrders] = await db.query("SELECT * FROM orders WHERE user_id =?", [
+  const [myOrders] = await db.query("SELECT * FROM orders WHERE buyer_id = ?", [
     userId,
   ]);
 
@@ -28,7 +28,7 @@ export const getAdminStats = async () => {
   );
 
   const [[reports]] = await db.query(
-    "SELECT COUNT(*) AS pendingReports FROM reports WHERE status = 'pending'",
+    "SELECT COUNT(*) AS pendingReports FROM reports WHERE status IN ('open', 'reviewing')",
   );
 
   return {
@@ -41,21 +41,22 @@ export const getAdminStats = async () => {
 // the res database
 
 export const getResMangerData = async () => {
-  const [services] = await db.query(
-    `SELECT services.*, users.full_name AS student_name 
-    FROM services 
-    JOIN users  ON services.student_id = users.id 
-    ORDER BY services.created_at DESC`,
+  const [requests] = await db.query(
+    `SELECT rr.*, r.name AS residence_name, u.full_name AS student_name
+     FROM residence_requests rr
+     JOIN residences r ON rr.residence_id = r.id
+     JOIN users u ON rr.student_id = u.id
+     ORDER BY rr.requested_at DESC`,
   );
 
-  return { maintenanceRequests: services };
+  return { maintenanceRequests: requests };
 };
 
 // the provider database
 
 export const getProviderData = async (providerId) => {
   const [assignedJobs] = await db.query(
-    "SELECT * FROM services WHERE service_provider_id = ?",
+    "SELECT * FROM jobs WHERE provider_id = ?",
     [providerId],
   );
 

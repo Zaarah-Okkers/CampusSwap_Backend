@@ -3,16 +3,7 @@
 // login page
 // dashboard page - res manager, admin , student, provider 
 
-import dotenv from 'dotenv';
-import mysql from 'mysql2/promise';
+import pool from './db.js';
 
-dotenv.config();
-
-export const db = mysql.createPool({
-  user: process.env.DB_USER,
-  host:  process.env.DB_HOST,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  port: process.env.DB_PORT
-  
-});
+// Keep the older model files on the same shared connection pool as the API.
+export const db = pool;

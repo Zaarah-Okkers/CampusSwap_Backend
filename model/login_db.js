@@ -25,7 +25,6 @@ export const CreateUser = async (userdata) => {
     role,
     university,
     company,
-    phone,
   } = userdata;
 
   // the university : this will alllow the student to look up university_id from the name
@@ -44,7 +43,9 @@ export const CreateUser = async (userdata) => {
   }
 
   const [result] = await db.query(
-    `INSERT INTO users (email, password_hash, full_name, student_number, role, university_id, phone, is_verified)                      VALUES (?,?,?,?,?,?,?, TRUE)`,
+    `INSERT INTO users
+      (email, password_hash, full_name, student_number, role, university_id, company)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
 
     [
       email,
@@ -53,7 +54,7 @@ export const CreateUser = async (userdata) => {
       student_number || null,
       role,
       university_id,
-      phone || null,
+      company || null,
     ],
   );
 

@@ -6,6 +6,10 @@ import pool from './config/db.js';
 import serviceTypeRoutes from './routes/serviceTypeRoutes.js';
 import providerRoutes from './routes/providerRoutes.js';
 import serviceRoutes from './routes/serviceRoutes.js';
+import loginRouter from './routes/loginRouter.js';
+import dashboardsRouter from './routes/dashboardsRouter.js';
+import homeRouter from './routes/homeRouter.js';
+import commerceRouter from './routes/commerceRoutes.js';
 
 dotenv.config();
 
@@ -48,6 +52,10 @@ app.get('/api/test-db', async (req, res) => {
 });
 
 // API routes
+app.use('/api/auth', loginRouter);
+app.use('/api/home', homeRouter);
+app.use('/api/dashboards', dashboardsRouter);
+app.use('/api', commerceRouter);
 app.use('/api/service-types', serviceTypeRoutes);
 app.use('/api/providers', providerRoutes);
 app.use('/api/services', serviceRoutes);
