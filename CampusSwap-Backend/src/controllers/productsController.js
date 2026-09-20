@@ -70,7 +70,7 @@ async function createProduct(req, res) {
       sellerId,
       categoryId,
       universityId = null,
-      listingType = 'sell',
+      listingType = 'sale',
       name,
       price = null,
       rentPeriod = null,
@@ -85,6 +85,12 @@ async function createProduct(req, res) {
       return res.status(400).json({ error: 'name, condition, sellerId, and categoryId are required' })
     }
 
+    const normalizedListingType = listingType === 'sell' ? 'sale' : listingType
+    const allowedListingTypes = ['sale', 'swap', 'sale_and_swap', 'rent']
+    if (!allowedListingTypes.includes(normalizedListingType)) {
+      return res.status(400).json({ error: 'listingType must be sale, swap, sale_and_swap, or rent' })
+    }
+
     await conn.beginTransaction()
 
     const [sellerRows] = await conn.query('SELECT id FROM users WHERE id = ?', [sellerId])
@@ -97,7 +103,7 @@ async function createProduct(req, res) {
       `INSERT INTO products
         (seller_id, category_id, university_id, listing_type, name, description, price, rent_period, swap_for, condition_label, condition_class, image_url)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [sellerId, categoryId, universityId, listingType, name, description, price, rentPeriod, swapFor, condition, conditionClass, image]
+      [sellerId, categoryId, universityId, normalizedListingType, name, description, price, rentPeriod, swapFor, condition, conditionClass, image]
     )
 
     await conn.commit()

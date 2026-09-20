@@ -395,6 +395,12 @@ INSERT INTO universities (name) VALUES
   ('Wits'),
   ('Stellenbosch');
 
+-- Marketplace seller used by the starter listings
+INSERT INTO users (full_name, email, password_hash, role, student_number, university_id)
+VALUES
+  ('CampusSwap Seller', 'seller@campusswap.local', 'password', 'student', 'CS-SELLER-001',
+   (SELECT id FROM universities WHERE name = 'University of Cape Town (UCT)'));
+
 -- Categories (no duplicates)
 INSERT INTO categories (name, description) VALUES
   ('Books & Textbooks', 'Academic books and textbooks'),
@@ -403,6 +409,30 @@ INSERT INTO categories (name, description) VALUES
   ('Clothing', 'Clothing and fashion items'),
   ('Stationery', 'Stationery and study supplies'),
   ('Other', 'Other student marketplace items');
+
+-- Marketplace starter listings
+INSERT INTO products
+  (seller_id, category_id, university_id, listing_type, name, description, price,
+   condition_label, condition_status, image_url, location, status)
+VALUES
+  ((SELECT id FROM users WHERE email = 'seller@campusswap.local'),
+   (SELECT id FROM categories WHERE name = 'Books & Textbooks'),
+   (SELECT id FROM universities WHERE name = 'University of Cape Town (UCT)'),
+   'sale', 'Introduction to Computer Science Textbook',
+   ' lightly used textbook in good condition.', 350.00, 'Good', 'good',
+   'https://placehold.co/600x400?text=Textbook', 'UCT Upper Campus', 'active'),
+  ((SELECT id FROM users WHERE email = 'seller@campusswap.local'),
+   (SELECT id FROM categories WHERE name = 'Electronics'),
+   (SELECT id FROM universities WHERE name = 'University of Cape Town (UCT)'),
+   'sale', 'Wireless Keyboard',
+   'Compact wireless keyboard suitable for study spaces.', 250.00, 'Like new', 'like_new',
+   'https://placehold.co/600x400?text=Keyboard', 'UCT Upper Campus', 'active'),
+  ((SELECT id FROM users WHERE email = 'seller@campusswap.local'),
+   (SELECT id FROM categories WHERE name = 'Furniture'),
+   (SELECT id FROM universities WHERE name = 'Wits'),
+   'sale', 'Study Desk',
+   'Sturdy desk suitable for a student residence.', 800.00, 'Good', 'good',
+   'https://placehold.co/600x400?text=Study+Desk', 'Wits Braamfontein', 'active');
 
 -- Residences (no duplicates)
 INSERT INTO residences (name, location, rooms_available, monthly_price, description)
