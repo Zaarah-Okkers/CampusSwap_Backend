@@ -18,6 +18,8 @@ DROP TABLE IF EXISTS categories;
 DROP TABLE IF EXISTS job_reviews;
 DROP TABLE IF EXISTS job_applications;
 DROP TABLE IF EXISTS jobs;
+DROP TABLE IF EXISTS services;
+DROP TABLE IF EXISTS service_types;
 DROP TABLE IF EXISTS service_provider_profiles;
 DROP TABLE IF EXISTS residence_payments;
 DROP TABLE IF EXISTS residence_requests;
@@ -203,6 +205,51 @@ CREATE TABLE payments (
 ) ENGINE=InnoDB;
 
 -- =========================================================
+-- SAFEHOME SERVICE TYPES / REQUESTS
+-- =========================================================
+CREATE TABLE service_types (
+  id          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  name        VARCHAR(150) NOT NULL UNIQUE,
+  description VARCHAR(255) NULL,
+  is_active   BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+CREATE TABLE services (
+  id                  BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  student_id          BIGINT UNSIGNED NOT NULL,
+  service_provider_id BIGINT UNSIGNED NULL,
+  service_type_id     INT UNSIGNED NOT NULL,
+  title               VARCHAR(200) NOT NULL,
+  description         TEXT NOT NULL,
+  residence_name      VARCHAR(200) NOT NULL,
+  room_number         VARCHAR(80) NULL,
+  photo_url           VARCHAR(500) NULL,
+  priority            ENUM('normal','medium','high','emergency') NOT NULL DEFAULT 'normal',
+  status              ENUM('pending','assigned','in_progress','completed','cancelled') NOT NULL DEFAULT 'pending',
+  estimated_cost      DECIMAL(10,2) NULL,
+  created_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (service_provider_id) REFERENCES users(id) ON DELETE SET NULL,
+  FOREIGN KEY (service_type_id) REFERENCES service_types(id) ON DELETE RESTRICT,
+  INDEX idx_services_student (student_id),
+  INDEX idx_services_provider (service_provider_id),
+  INDEX idx_services_type (service_type_id),
+  INDEX idx_services_status_priority (status, priority)
+) ENGINE=InnoDB;
+
+INSERT INTO service_types (name, description) VALUES
+  ('Emergency Plumbing', 'Urgent leaks, blocked drains and plumbing failures.'),
+  ('Emergency Electrical', 'Urgent electrical faults and power failures.'),
+  ('Locksmith', 'Urgent lockout and access assistance.'),
+  ('Security', 'Urgent residence security assistance.'),
+  ('Plumbing', 'General plumbing repairs.'),
+  ('Electrical', 'General electrical repairs.'),
+  ('Cleaning', 'Residence cleaning services.'),
+  ('Handyman', 'General maintenance and repairs.');
+
+-- =========================================================
 -- SERVICE PROVIDERS / JOBS
 -- =========================================================
 CREATE TABLE service_provider_profiles (
@@ -214,6 +261,7 @@ CREATE TABLE service_provider_profiles (
   hourly_rate         DECIMAL(10,2) NULL,
   rating              DECIMAL(3,2) NOT NULL DEFAULT 0.00,
   total_reviews       INT UNSIGNED NOT NULL DEFAULT 0,
+  accepts_emergency   BOOLEAN NOT NULL DEFAULT TRUE,
   verification_status ENUM('pending','verified','rejected') NOT NULL DEFAULT 'pending',
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;

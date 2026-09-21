@@ -5,16 +5,14 @@ export const createServiceRequest = async (req, res) => {
      console.log('BODY: req.body', req.body); // Log the request body for debugging 
     try {
 
-        const {
-            student_id,
-            service_type_id,
-            title,
-            description,
-            residence_name,
-            room_number,
-            photo_url,
-            priority
-        } = req.body;
+        const student_id = req.body.student_id ?? req.body.studentId;
+        const service_type_id = req.body.service_type_id ?? req.body.serviceTypeId;
+        const title = req.body.title;
+        const description = req.body.description;
+        const residence_name = req.body.residence_name ?? req.body.residenceName;
+        const room_number = req.body.room_number ?? req.body.roomNumber;
+        const photo_url = req.body.photo_url ?? req.body.photoUrl;
+        const priority = req.body.priority || (req.body.emergency ? 'emergency' : 'normal');
 
         // Check required fields
         if (
@@ -70,7 +68,7 @@ export const createServiceRequest = async (req, res) => {
                 residence_name,
                 room_number || null,
                 photo_url || null,
-                priority || 'medium'
+                priority
             ]
         );
 

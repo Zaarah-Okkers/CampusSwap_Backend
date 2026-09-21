@@ -4,7 +4,7 @@ export const getProviders = async (req, res) => {
 
     try {
 
-        const { service } = req.query;
+        const { service, emergency } = req.query;
 
         let query = `
             SELECT
@@ -18,7 +18,8 @@ export const getProviders = async (req, res) => {
                 p.rating,
                 p.total_reviews AS rating_count,
                 (p.verification_status = 'verified') AS is_verified,
-                p.service_type AS services
+                p.service_type AS services,
+                p.accepts_emergency AS emergency_ready
             FROM users u
             JOIN service_provider_profiles p ON p.user_id = u.id
             WHERE u.role = 'service_provider'
@@ -26,6 +27,10 @@ export const getProviders = async (req, res) => {
         `;
 
         const queryParams = [];
+
+        if (emergency === 'true') {
+            query += ` AND p.accepts_emergency = TRUE`;
+        }
 
         // Filter by service if one was provided
         if (service) {

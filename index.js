@@ -1,26 +1,6 @@
-import express from "express";
-import dotenv from "dotenv";
-import cors from "cors";
-
-// the pages imports
-import { db } from "./config/dhl_config.js";
-import loginRouter from "./routers/loginRouters.js";
-import dashboardsRouter from "./routers/dashboardsRouters.js";
-import homeRouter from "./routers/homeRouters.js";
-
-dotenv.config();
-const app = express();
-app.use(express.json());
-app.use(cors());
-
-// the api
-app.use("/api/auth", loginRouter);
-app.use("/api/dashboards", dashboardsRouter);
-app.use("/api/home", homeRouter);
-
-app.listen(3000, () => {
-  console.log("Server is running on http://localhost:3000");
-});
+// The project has one authoritative server entry point. Keep `index.js`
+// compatible for hosts that invoke the package's historical main file.
+import './server.js';
 
 // my workflow
 // 1. model

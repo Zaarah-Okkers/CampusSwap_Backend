@@ -1,4 +1,5 @@
 // callbacks for the login page
+import bcrypt from 'bcryptjs';
 import {
   getUserByEmail,
   CreateUser,
@@ -9,6 +10,7 @@ import {
 export const handlelogin = async (req, res) => {
   try {
     const { email, password, role } = req.body;
+    if (!email || !password) return res.status(400).json({ message: 'Email and password are required' });
 
     const user = await getUserByEmail(email);
 
@@ -16,9 +18,10 @@ export const handlelogin = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    if (user.password_hash !== password) {
-      return res.status(401).json({ message: "Incorrect password" });
-    }
+    const matches = user.password_hash?.startsWith('$2')
+      ? await bcrypt.compare(password, user.password_hash)
+      : user.password_hash === password;
+    if (!matches) return res.status(401).json({ message: 'Incorrect password' });
 
     if (role && user.role !== role) {
       return res
@@ -37,7 +40,9 @@ export const handlelogin = async (req, res) => {
 
 export const register = async (req, res) => {
   try {
-    const userId = await CreateUser(req.body);
+    const password = req.body.password || req.body.password_hash;
+    if (!password || password.length < 6) return res.status(400).json({ error: 'Password must be at least 6 characters' });
+    const userId = await CreateUser({ ...req.body, password_hash: await bcrypt.hash(password, 12) });
     res.status(201).json({ message: "user registered successfully", userId });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -67,13 +72,12 @@ export const changePassword = async (req, res) => {
       return res.status(404).json({ error: "User not found" });
     }
 
-    // Verify current password (plain text for now — will hash later)
-    if (user.password_hash !== currentPassword) {
-      return res.status(401).json({ error: "Incorrect credentials" });
-    }
+    const matches = user.password_hash?.startsWith('$2')
+      ? await bcrypt.compare(currentPassword, user.password_hash)
+      : user.password_hash === currentPassword;
+    if (!matches) return res.status(401).json({ error: 'Incorrect credentials' });
 
-    // Update
-    await updatePassword(userId, newPassword);
+    await updatePassword(userId, await bcrypt.hash(newPassword, 12));
 
     res.status(200).json({ message: "Password updated successfully" });
   } catch (error) {

@@ -5,6 +5,14 @@ const router = express.Router();
 
 router.get('/products', async (req, res) => {
   try {
+    const { search = '', university = '', condition = '', maxPrice = '' } = req.query
+    const params = []
+    const filters = ["p.status = 'active'"]
+    if (search) { filters.push('(p.name LIKE ? OR p.description LIKE ?)'); params.push(`%${search}%`, `%${search}%`) }
+    if (university) { filters.push('u.name = ?'); params.push(university) }
+    if (condition) { filters.push('p.condition_label = ?'); params.push(condition) }
+    if (maxPrice !== '') { filters.push('p.price <= ?'); params.push(Number(maxPrice)) }
+
     const [products] = await pool.query(`
       SELECT p.*, c.name AS category_name, u.name AS university_name,
              seller.full_name AS seller_name, seller.rating AS seller_rating
@@ -12,9 +20,9 @@ router.get('/products', async (req, res) => {
       JOIN users seller ON seller.id = p.seller_id
       LEFT JOIN categories c ON c.id = p.category_id
       LEFT JOIN universities u ON u.id = p.university_id
-      WHERE p.status = 'active'
-      ORDER BY p.created_at DESC
-    `);
+         WHERE ${filters.join(' AND ')}
+         ORDER BY p.created_at DESC
+      `, params);
     res.json(products);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch products' });
@@ -35,10 +43,10 @@ router.get('/universities', async (req, res) => {
 router.get('/repairs', async (req, res) => {
   try {
     const [repairs] = await pool.query(`
-      SELECT id, title, description, location AS residence_name,
-             NULL AS room_number, pay AS estimated_cost, status
-      FROM jobs
-      WHERE status IN ('available', 'accepted', 'scheduled')
+      SELECT id, title, description, residence_name, room_number,
+             estimated_cost, status, priority, created_at
+      FROM services
+      WHERE status NOT IN ('completed', 'cancelled')
       ORDER BY created_at DESC
     `);
     res.json(repairs);
