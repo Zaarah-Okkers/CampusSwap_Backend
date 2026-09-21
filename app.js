@@ -3,6 +3,7 @@ import cors from 'cors'
 import bcrypt from 'bcryptjs'
 import crypto from 'node:crypto'
 import pool from './config/db.js'
+import safeHomeRoutes from './routes/serviceRoutes.js'
 
 const app = express()
 const sessions = new Map()
@@ -25,6 +26,9 @@ const userPayload = user => {
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok', service: 'campusswap-api' }))
 app.get('/', (req, res) => res.json({ message: 'CampusSwap API is running' }))
+
+// Mounted route module for clients that use the SafeHome namespace.
+app.use('/api/safehome', safeHomeRoutes)
 
 app.post('/api/auth/login', asyncRoute(async (req, res) => {
   const { email, password, role } = req.body || {}
