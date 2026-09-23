@@ -28,7 +28,7 @@ app.get('/api/health', (req, res) => res.json({ status: 'ok', service: 'campussw
 app.get('/', (req, res) => res.json({ message: 'CampusSwap API is running' }))
 
 // Mounted route module for clients that use the SafeHome namespace.
-app.use('/api/safehome', safeHomeRoutes)
+app.use('/api/services', safeHomeRoutes)
 
 app.post('/api/auth/login', asyncRoute(async (req, res) => {
   const { email, password, role } = req.body || {}
@@ -122,53 +122,24 @@ app.get('/api/providers', asyncRoute(async (req, res) => {
   res.json({ success: true, count: data.length, data })
 }))
 
-const serviceQuery = `SELECT s.*, st.name AS service_type, student.full_name AS student_name, provider.full_name AS provider_name FROM services s JOIN service_types st ON st.id=s.service_type_id JOIN users student ON student.id=s.student_id LEFT JOIN users provider ON provider.id=s.service_provider_id`
-app.get('/api/services', asyncRoute(async (req, res) => {
-  const { student_id, studentId, provider_id, providerId, status } = req.query
-  const filters = ['1=1']; const params = []
-  if (student_id || studentId) { filters.push('s.student_id=?'); params.push(student_id || studentId) }
-  if (provider_id || providerId) { filters.push('s.service_provider_id=?'); params.push(provider_id || providerId) }
-  if (status) { filters.push('s.status=?'); params.push(status) }
-  const [data] = await pool.query(`${serviceQuery} WHERE ${filters.join(' AND ')} ORDER BY s.created_at DESC`, params)
-  res.json({ success: true, count: data.length, data })
-}))
+ const serviceQuery = `
+  SELECT
+    s.*,
+    st.name AS service_type,
+    student.full_name AS student_name,
+    provider.full_name AS provider_name
+  FROM services s
+  JOIN service_types st ON st.id = s.service_type_id
+  JOIN users student ON student.id = s.student_id
+  LEFT JOIN users provider ON provider.id = s.service_provider_id
+`
 
 app.get('/api/repairs', asyncRoute(async (req, res) => {
   const [data] = await pool.query(`${serviceQuery} WHERE s.status NOT IN ('completed','cancelled') ORDER BY s.created_at DESC`)
   res.json(data)
 }))
 
-app.post(['/api/services', '/api/service-requests', '/api/emergency-requests'], asyncRoute(async (req, res) => {
-  const b = req.body || {}
-  const studentId = b.student_id || b.studentId
-  const serviceTypeId = b.service_type_id || b.serviceTypeId
-  const emergency = req.path === '/api/emergency-requests' || b.emergency === true
-  const priority = emergency ? 'emergency' : (b.priority || 'normal')
-  const title = b.title || b.service || 'SafeHome service request'
-  const residence = b.residence_name || b.residenceName
-  if (!studentId || !serviceTypeId || !b.description || !residence) return res.status(400).json({ success: false, message: 'student, service type, description and residence are required' })
-  const [result] = await pool.query('INSERT INTO services (student_id,service_type_id,title,description,residence_name,room_number,photo_url,priority) VALUES (?,?,?,?,?,?,?,?)', [studentId, serviceTypeId, title, b.description, residence, b.room_number || b.roomNumber || null, b.photo_url || b.photoUrl || null, priority])
-  const [[data]] = await pool.query(`${serviceQuery} WHERE s.id=?`, [result.insertId])
-  res.status(201).json({ success: true, message: 'Service request created successfully', data })
-}))
 
-app.patch('/api/services/:id/assign', asyncRoute(async (req, res) => {
-  const providerId = req.body.service_provider_id || req.body.providerId
-  if (!providerId) return res.status(400).json({ error: 'providerId is required' })
-  await pool.query("UPDATE services SET service_provider_id=?,status='assigned' WHERE id=?", [providerId, req.params.id])
-  const [[data]] = await pool.query(`${serviceQuery} WHERE s.id=?`, [req.params.id])
-  if (!data) return res.status(404).json({ error: 'Service request not found' })
-  res.json({ success: true, data })
-}))
-
-app.patch('/api/services/:id/status', asyncRoute(async (req, res) => {
-  const allowed = ['pending', 'assigned', 'in_progress', 'completed', 'cancelled']
-  if (!allowed.includes(req.body.status)) return res.status(400).json({ error: 'Invalid service status' })
-  const [result] = await pool.query('UPDATE services SET status=? WHERE id=?', [req.body.status, req.params.id])
-  if (!result.affectedRows) return res.status(404).json({ error: 'Service request not found' })
-  const [[data]] = await pool.query(`${serviceQuery} WHERE s.id=?`, [req.params.id])
-  res.json({ success: true, data })
-}))
 
 app.post('/api/orders/checkout', asyncRoute(async (req, res) => {
   const b = req.body || {}; const buyer = b.buyerId || b.buyer_id; const items = b.items
@@ -184,6 +155,7 @@ app.post('/api/orders/checkout', asyncRoute(async (req, res) => {
     await connection.commit(); res.status(201).json({ id: order.insertId, order_reference: reference, total_amount: total, status: 'pending_payment' })
   } catch (error) { await connection.rollback(); throw error } finally { connection.release() }
 }))
+
 app.get('/api/orders/:id', asyncRoute(async (req, res) => {
   const [[order]] = await pool.query('SELECT * FROM orders WHERE id=?', [req.params.id])
   if (!order) return res.status(404).json({ error: 'Order not found' })
