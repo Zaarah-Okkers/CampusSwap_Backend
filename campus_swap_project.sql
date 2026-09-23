@@ -72,7 +72,7 @@ CREATE TABLE products (
   CONSTRAINT fk_products_university FOREIGN KEY (university_id) REFERENCES universities(id) ON DELETE SET NULL
 );
 
--- 5. SERVICE TYPES (UPDATED with SafeHome columns)
+-- 5. SERVICE TYPES
 CREATE TABLE service_types (
   id          INT AUTO_INCREMENT,
   name        VARCHAR(100) NOT NULL UNIQUE,
@@ -153,7 +153,7 @@ CREATE TABLE order_items (
   INDEX idx_order_items_order (order_id)
 );
 
--- 8. REPORTS
+-- 8. REPORTS / PAYMENTS / REVIEWS
 CREATE TABLE reports (
   id               INT AUTO_INCREMENT,
   reporter_id      INT NOT NULL,
@@ -198,7 +198,7 @@ CREATE TABLE reviews (
   CONSTRAINT fk_reviews_reviewer FOREIGN KEY (reviewer_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- 9. SERVICE PROVIDER PROFILES (UPDATED with SafeHome column)
+-- 9. SERVICE PROVIDER PROFILES
 CREATE TABLE service_provider_profiles (
   user_id             INT PRIMARY KEY,
   business_name       VARCHAR(200) NULL,
@@ -216,7 +216,7 @@ CREATE TABLE service_provider_profiles (
   CONSTRAINT fk_provider_profiles_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- 10. SERVICES (NEW - replaces jobs)
+-- 10. SERVICES
 CREATE TABLE services (
   id INT AUTO_INCREMENT PRIMARY KEY,
   student_id INT NOT NULL,
@@ -286,7 +286,7 @@ CREATE TABLE residence_payments (
   INDEX idx_res_payment_status (status)
 );
 
--- 12. NOTIFICATIONS & REPORTS
+-- 12. NOTIFICATIONS / SAFETY / ADS / SUBS
 CREATE TABLE notifications (
   id         INT AUTO_INCREMENT,
   user_id    INT NOT NULL,
@@ -434,17 +434,17 @@ VALUES
   (23, 1, 1, 'sale', 'Introduction to Computer Science Textbook',
    'Lightly used textbook in good condition.',
    350.00, NULL, NULL, 'good',
-   'https://placehold.co/600x400?text=Textbook',
+   'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=600&h=600&fit=crop',
    'UCT Upper Campus', 0.0, 0, 'active'),
   (23, 2, 1, 'sale', 'Wireless Keyboard',
    'Compact wireless keyboard suitable for study spaces.',
    250.00, NULL, NULL, 'like_new',
-   'https://placehold.co/600x400?text=Keyboard',
+   'https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=600&h=600&fit=crop',
    'UCT Upper Campus', 0.0, 0, 'active'),
   (23, 3, 2, 'sale', 'Study Desk',
    'Sturdy desk suitable for a student residence.',
    800.00, NULL, NULL, 'good',
-   'https://placehold.co/600x400?text=Study+Desk',
+   'https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?w=600&h=600&fit=crop',
    'Wits Braamfontein', 0.0, 0, 'active');
 
 INSERT INTO service_types (name, description, is_active, accepts_emergency) VALUES
@@ -503,3 +503,29 @@ INSERT INTO residences (manager_id, name, location, rooms_available, monthly_pri
   (NULL, 'Claremont House',          'Claremont',                    3, 3900.00, 'Student accommodation',                           'active'),
   (NULL, 'Mowbray Residence',        'Mowbray',                      9, 3600.00, 'Student accommodation',                           'active'),
   (NULL, 'Observatory Lodge',        'Observatory',                  2, 4500.00, 'Student accommodation',                           'active');
+
+-- ============================================================
+-- DEMO CREDENTIALS
+-- Plaintext passwords here; the login endpoint auto-upgrades to
+-- bcrypt on the first successful login.
+--
+--   thabo.m@myuct.ac.za              / student123   (student)
+--   info@capeplumbing.co.za          / provider123  (service provider)
+--   resmanager.uct@campusswap.co.za  / res123       (residence manager)
+--   lerato.admin@campusswap.co.za    / admin123     (admin)
+-- ============================================================
+
+UPDATE users SET password_hash = 'student123'  WHERE email = 'thabo.m@myuct.ac.za';
+UPDATE users SET password_hash = 'student123'  WHERE email = 'aisha.k@wits.ac.za';
+UPDATE users SET password_hash = 'student123'  WHERE email = 'naledi.s@myuct.ac.za';
+UPDATE users SET password_hash = 'student123'  WHERE email = 'sipho.d@myuct.ac.za';
+
+UPDATE users SET password_hash = 'provider123' WHERE email = 'info@capeplumbing.co.za';
+UPDATE users SET password_hash = 'provider123' WHERE email = 'sparks.fix@gmail.com';
+UPDATE users SET password_hash = 'provider123' WHERE email = 'handy.campus@gmail.com';
+
+UPDATE users SET password_hash = 'res123'      WHERE email = 'resmanager.uct@campusswap.co.za';
+UPDATE users SET password_hash = 'res123'      WHERE email = 'resmanager.cput@campusswap.co.za';
+
+UPDATE users SET password_hash = 'admin123'    WHERE email = 'lerato.admin@campusswap.co.za';
+UPDATE users SET password_hash = 'admin123'    WHERE email = 'zaarah.admin@campusswap.co.za';
