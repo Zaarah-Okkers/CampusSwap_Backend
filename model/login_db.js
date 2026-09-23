@@ -9,7 +9,7 @@ export const getUserByEmail = async (email) => {
     FROM users u
     LEFT JOIN universities uni ON u.university_id = uni.id
     WHERE u.email = ?`,
-    [email]
+    [email],
   );
   return rows[0];
 };
@@ -44,8 +44,8 @@ export const CreateUser = async (userdata) => {
 
   const [result] = await db.query(
     `INSERT INTO users
-      (email, password_hash, full_name, student_number, role, university_id, company)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+       (email, password_hash, full_name, student_number, role, university_id)
+       VALUES (?, ?, ?, ?, ?, ?)`,
 
     [
       email,
@@ -54,7 +54,7 @@ export const CreateUser = async (userdata) => {
       student_number || null,
       role,
       university_id,
-      company || null,
+      //company || null,
     ],
   );
 

@@ -348,11 +348,25 @@ CREATE TABLE subscriptions (
 -- ============================================================
 
 INSERT INTO universities (name, province) VALUES
-  ('University of Cape Town (UCT)', 'Western Cape'),
-  ('University of the Witwatersrand (Wits)', 'Gauteng'),
-  ('Stellenbosch University (SU)', 'Western Cape'),
-  ('Cape Peninsula University of Technology (CPUT)', 'Western Cape'),
-  ('University of the Western Cape (UWC)', 'Western Cape');
+  ('University of South Africa (UNISA) Cape Town Branch', 'Western Cape'),
+  ('University of Pretoria (UP)', 'Gauteng'),
+  ('University of Johannesburg (UJ)', 'Gauteng'),
+  ('Tshwane University of Technology (TUT)', 'Gauteng'),
+  ('University of South Africa (UNISA) main branch', 'Gauteng'),
+  ('University of KwaZulu-Natal (UKZN)', 'KwaZulu-Natal'),
+  ('Durban University of Technology (DUT)', 'KwaZulu-Natal'),
+  ('Mangosuthu University of Technology (MUT)', 'KwaZulu-Natal'),
+  ('Rhodes University', 'Eastern Cape'),
+  ('Nelson Mandela University (NMU)', 'Eastern Cape'),
+  ('Walter Sisulu University (WSU)', 'Eastern Cape'),
+  ('University of the Free State (UFS)', 'Free State'),
+  ('Central University of Technology (CUT)', 'Free State'),
+  ('North-West University (NWU)', 'North West'),
+  ('University of Limpopo (UL)', 'Limpopo'),
+  ('University of Venda (UNIVEN)', 'Limpopo'),
+  ('University of Mpumalanga (UMP)', 'Mpumalanga'),
+  ('Sol Plaatje University (SPU)', 'Northern Cape');
+  
 
 INSERT INTO categories (name, description) VALUES
   ('Books & Textbooks', 'Academic books and textbooks'),
@@ -529,3 +543,33 @@ UPDATE users SET password_hash = 'res123'      WHERE email = 'resmanager.cput@ca
 
 UPDATE users SET password_hash = 'admin123'    WHERE email = 'lerato.admin@campusswap.co.za';
 UPDATE users SET password_hash = 'admin123'    WHERE email = 'zaarah.admin@campusswap.co.za';
+
+
+
+-- ignore this 
+SELECT id, email, role, is_verified, created_at
+FROM users
+ORDER BY id DESC
+LIMIT 100;
+
+
+SELECT id, email, full_name, role, university_id, is_verified FROM users WHERE email = 'teststudent@myuct.ac.za';
+
+DESCRIBE users;
+
+																																
+SELECT id, email, full_name, role, university_id, is_verified
+FROM users
+WHERE email LIKE 'teststudent%';
+
+
+SELECT id, email, full_name, student_number, role, university_id, is_verified
+FROM users
+WHERE email = 'browsertest@myuct.ac.za';
+
+USE `CampusSwap`;
+
+
+  SELECT COUNT(*) FROM universities;   
+SELECT id, name FROM universities WHERE province = 'KwaZulu-Natal';
+
