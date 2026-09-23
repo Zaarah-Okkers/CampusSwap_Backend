@@ -144,7 +144,7 @@ CREATE TABLE order_items (
   product_id INT NOT NULL,
   seller_id  INT NOT NULL,
   quantity   INT NOT NULL DEFAULT 1,
-  unit_price DECIMAL(10,2) NOT NULL,
+  unit_price DECIMAL(10,2) NOT NULL, 
   subtotal   DECIMAL(10,2) AS (quantity * unit_price) STORED,
   PRIMARY KEY (id),
   CONSTRAINT fk_order_items_order FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
