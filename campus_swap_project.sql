@@ -721,3 +721,15 @@ INSERT INTO books (title, author, description, price, size, module, format, cove
    13);
    
 
+-- Give the three orphaned residences a manager so requests route correctly.
+UPDATE residences SET manager_id = 5 WHERE name = 'Claremont House';
+UPDATE residences SET manager_id = 6 WHERE name = 'Mowbray Residence';
+UPDATE residences SET manager_id = 7 WHERE name = 'Observatory Lodge';
+
+SELECT id, residence_id, student_id, status, requested_at
+FROM residence_requests
+ORDER BY id DESC
+LIMIT 5;
+
+
+
