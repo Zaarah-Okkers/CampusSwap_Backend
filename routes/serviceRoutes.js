@@ -1,27 +1,42 @@
-import express from 'express';
-
+import express from "express";
 import {
-    createServiceRequest,
-    getServiceRequests,
-    assignProvider,
-    updateServiceStatus
-} from '../controllers/serviceController.js';
+  createServiceRequest,
+  getServiceRequests,
+  getOpenRequests,
+  getRepairs,
+  submitServiceQuote,
+  approveServiceRequest,
+  declineServiceRequest,
+  assignProvider,
+  updateServiceStatus,
+} from "../controllers/serviceController.js";
+import {
+  createReview,
+  listProviderReviews,
+  checkServiceReview,
+} from "../controllers/serviceReviewController.js";
 
 const router = express.Router();
 
-// SafeHome service requests
-router.post('/', createServiceRequest);
-router.get('/', getServiceRequests);
+// Read
+router.get("/", getServiceRequests);
+router.get("/open", getOpenRequests);
+router.get("/reviews", listProviderReviews); // MUST come before /:id/review
+router.get("/:id/review", checkServiceReview);
 
-// Explicit emergency endpoint. The controller stores the request with emergency
-// priority while using the same validated SafeHome request workflow.
-router.post('/emergency', (req, res, next) => {
-    req.body = { ...req.body, emergency: true, priority: 'emergency' };
-    createServiceRequest(req, res, next);
+// Create
+router.post("/", createServiceRequest);
+router.post("/emergency", (req, res, next) => {
+  req.body = { ...req.body, emergency: true, priority: "emergency" };
+  createServiceRequest(req, res, next);
 });
+router.post("/:id/review", createReview);
 
-// Residence Manager/provider workflow
-router.patch('/:id/assign', assignProvider);
-router.patch('/:id/status', updateServiceStatus);
+// Workflow
+router.patch("/:id/quote", submitServiceQuote);
+router.patch("/:id/approve", approveServiceRequest);
+router.patch("/:id/decline", declineServiceRequest);
+router.patch("/:id/assign", assignProvider);
+router.patch("/:id/status", updateServiceStatus);
 
 export default router;

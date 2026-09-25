@@ -1,13 +1,7 @@
-
-import express from 'express';
-
-import {
-    getServiceTypes
-} from '../controllers/serviceTypeController.js';
+import express from "express";
+import { listServiceTypes } from "../controllers/serviceTypeController.js";
 
 const router = express.Router();
-
-router.get('/', getServiceTypes);
+router.get("/", listServiceTypes);
 
 export default router;
-

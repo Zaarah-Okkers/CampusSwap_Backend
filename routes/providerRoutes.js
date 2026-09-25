@@ -1,9 +1,7 @@
 import express from "express";
-
-import { getProviders } from '../controllers/providerController.js';
+import { listProviders } from "../controllers/providerController.js";
 
 const router = express.Router();
-
-router.get('/', getProviders);
+router.get("/", listProviders);
 
 export default router;
