@@ -17,10 +17,13 @@ const app = express();
 app.use(cors({
   origin: [
     'http://localhost:5173',
+    'https://campusswap-fontend-vnrd.onrender.com',
     'https://campusswap-fontend.onrender.com',
   ],
   credentials: true,
-}))
+  methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
 
 app.use(express.json({ limit: "2mb" }));
 
